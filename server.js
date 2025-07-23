@@ -20,4 +20,5 @@ app.listen(port, () => {
 });
 
 // Launch the scheduler script
-spawn('node', ['scheduler.cjs'], { stdio: 'inherit' });
+spawn('node', ['scheduler.mjs'], { stdio: 'inherit' });
+
