@@ -1,27 +1,30 @@
-import { Web3 } from 'web3';
+import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const RPC_URL = process.env.RPC_URL;
 
 if (!PRIVATE_KEY || !RPC_URL) {
-  console.error("Missing PRIVATE_KEY or RPC_URL in environment variables.");
+  console.error("Missing PRIVATE_KEY or RPC_URL.");
   process.exit(1);
 }
 
-const web3 = new Web3(RPC_URL);
+try {
+  // Parse the private key (as a keypair array from Render environment)
+  const keyArray = PRIVATE_KEY.startsWith('[')
+    ? JSON.parse(PRIVATE_KEY)
+    : Uint8Array.from(Buffer.from(PRIVATE_KEY.replace(/^0x/, ''), 'hex'));
 
-async function run() {
-  try {
-    const account = web3.eth.accounts.privateKeyToAccount(PRIVATE_KEY);
-    console.log("Scheduler running for account:", account.address);
+  const keypair = Keypair.fromSecretKey(Uint8Array.from(keyArray));
+  const connection = new Connection(RPC_URL, 'confirmed');
 
-    const balance = await web3.eth.getBalance(account.address);
-    console.log("Current balance:", web3.utils.fromWei(balance, 'ether'), "ETH");
+  const publicKey = keypair.publicKey;
+  console.log("Scheduler running for account:", publicKey.toBase58());
 
-    // Add your custom task logic here
-  } catch (err) {
-    console.error("Error in scheduler:", err);
-  }
+  const balance = await connection.getBalance(publicKey);
+  console.log("Current balance:", balance / 1e9, "SOL");
+
+  // Add your Solana task logic here...
+
+} catch (err) {
+  console.error("Error in scheduler:", err);
 }
-
-run();
