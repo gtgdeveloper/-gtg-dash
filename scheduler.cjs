@@ -1,4 +1,4 @@
-const Web3 = require('web3');
+import { Web3 } from 'web3';
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const RPC_URL = process.env.RPC_URL;
@@ -8,19 +8,20 @@ if (!PRIVATE_KEY || !RPC_URL) {
   process.exit(1);
 }
 
-const web3 = new Web3(new Web3.providers.HttpProvider(RPC_URL));
+const web3 = new Web3(RPC_URL);
 
 async function run() {
-  const account = web3.eth.accounts.privateKeyToAccount(PRIVATE_KEY);
-  console.log("Scheduler running for account:", account.address);
+  try {
+    const account = web3.eth.accounts.privateKeyToAccount(PRIVATE_KEY);
+    console.log("Scheduler running for account:", account.address);
 
-  // Example: fetch balance
-  const balance = await web3.eth.getBalance(account.address);
-  console.log("Current balance:", web3.utils.fromWei(balance, 'ether'), "ETH");
+    const balance = await web3.eth.getBalance(account.address);
+    console.log("Current balance:", web3.utils.fromWei(balance, 'ether'), "ETH");
 
-  // Add your scheduled task logic here
+    // Add your custom task logic here
+  } catch (err) {
+    console.error("Error in scheduler:", err);
+  }
 }
 
-run().catch((err) => {
-  console.error("Error running scheduler:", err);
-});
+run();
